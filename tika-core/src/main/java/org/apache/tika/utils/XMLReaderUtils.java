@@ -39,7 +39,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -160,15 +159,6 @@ public class XMLReaderUtils implements Serializable {
             return new InputSource(new StringReader(""));
         }
     };
-
-    private static final XMLResolver IGNORING_STAX_ENTITY_RESOLVER =
-            new XMLResolver() {
-                @Override
-                public Object resolveEntity(String publicID, String systemID, String baseURI, String namespace) throws
-                        XMLStreamException {
-                    return "";
-                }
-            };
 
     /**
      * Set the maximum number of entity expansions allowable in SAX/DOM/StAX parsing.
@@ -317,20 +307,19 @@ public class XMLReaderUtils implements Serializable {
      * If a factory is not explicitly specified, then a default factory
      * instance is created and returned. The default factory instance is
      * configured to be namespace-aware and to apply reasonable security
-     * using the {@link #IGNORING_STAX_ENTITY_RESOLVER}.
+     * precautions
      *
      * @return StAX input factory
      * @since Apache Tika 1.13
      */
     public static XMLInputFactory getXMLInputFactory() {
         XMLInputFactory factory = XMLInputFactory.newFactory();
-
+        factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         tryToSetStaxProperty(factory, XMLInputFactory.IS_NAMESPACE_AWARE, true);
         tryToSetStaxProperty(factory, XMLInputFactory.IS_VALIDATING, false);
         tryToSetStaxProperty(factory, XMLInputFactory.SUPPORT_DTD, false);
         tryToSetStaxProperty(factory, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 
-        factory.setXMLResolver(IGNORING_STAX_ENTITY_RESOLVER);
         trySetStaxSecurityManager(factory);
         return factory;
     }
