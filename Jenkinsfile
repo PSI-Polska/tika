@@ -25,10 +25,8 @@ pipeline {
         }
         stage('Deploy') {
             when {
-                allOf {
-                    expression {
-                        params.release == true
-                    }
+                expression {
+                    params.RELEASE_FLAG == true
                 }
             }
             steps {
